@@ -94,32 +94,27 @@ ISR(TIMER1_COMPA_vect)
 }
 
 void updateLedISR(){
-  
+  digitalWrite(led1Pin, LOW);
+  digitalWrite(led2Pin, LOW);
+  digitalWrite(led3Pin, LOW);
+  digitalWrite(led4Pin, LOW);
   uint8_t nextLed = values[currentLed];
   switch (nextLed) {
     case 0:{ 
     digitalWrite(led1Pin, HIGH);
-    digitalWrite(led2Pin, LOW);
-    digitalWrite(led3Pin, LOW);
-    digitalWrite(led4Pin, LOW);
+    break;
     }
     case 1: { 
-    digitalWrite(led1Pin, LOW);
     digitalWrite(led2Pin, HIGH);
-    digitalWrite(led3Pin, LOW);
-    digitalWrite(led4Pin, LOW);
+    break;
     }
     case 2:{ 
-    digitalWrite(led1Pin, LOW);
-    digitalWrite(led2Pin, LOW);
     digitalWrite(led3Pin, HIGH);
-    digitalWrite(led4Pin, LOW);
+    break;
     }
     case 3:{ 
-    digitalWrite(led1Pin, LOW);
-    digitalWrite(led2Pin, LOW);
-    digitalWrite(led3Pin, LOW);
     digitalWrite(led4Pin, HIGH);
+    break;
     }
   }
   ++currentLed;
@@ -151,6 +146,10 @@ void setup() {
   pinMode(button2Pin, INPUT);
   pinMode(button3Pin, INPUT);
   pinMode(button4Pin, INPUT);
+  pinMode(led1Pin, OUTPUT);
+  pinMode(led2Pin, OUTPUT);
+  pinMode(led3Pin, OUTPUT);
+  pinMode(led4Pin, OUTPUT);
   // Initialize random values
   for (int i = 0; i < VALUES_COUNT; ++i) {
     values[i] = random(0, 4);
