@@ -152,7 +152,13 @@ void setup() {
   pinMode(led4Pin, OUTPUT);
   // Initialize random values
   for (int i = 0; i < VALUES_COUNT; ++i) {
-    values[i] = random(0, 4);
+    uint8_t val = random(0, 4);
+    if (i > 0) {
+      do {
+      val = random(0, 4);
+      } while (val == values[i - 1]);
+    }
+    values[i] = val;
   }
   retrieveScore();
 
