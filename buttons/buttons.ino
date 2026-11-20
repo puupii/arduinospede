@@ -20,7 +20,8 @@ const int led2Pin = 4;
 const int led3Pin = 5;
 const int led4Pin = 6;
 
-
+enum State { IDLE, READY, GAME };
+State state = IDLE;
 volatile byte ledState = HIGH;
 
 // LCD pins
@@ -28,16 +29,23 @@ const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
 //////////////////////////////////////////////
 //LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
+int currentValue = 0;
 int currentLed = 0;
+int idleanimation = 0;
 
 void saveScore() {
+
+  byte savedScore;
+  EEPROM.get(eepromAddress, savedScore);
+  if (score > savedScore){
   EEPROM.update(eepromAddress, score);
+  }
 }
 
 void retrieveScore() {
   byte savedScore;
   EEPROM.get(eepromAddress, savedScore);
-  score = savedScore;
+  Serial.println("current record: " + savedScore);
 }
 
 void scoreUp() {
@@ -76,10 +84,9 @@ bool checkCorrect() {
     case 2: return b3 && !(b1 || b2 || b4);
     case 3: return b4 && !(b1 || b2 || b3);
   }*/
-  uint8_t value = values[currentLed];
+  uint8_t value = values[currentValue];
   int expectedButton;
-  Serial.print("LED value: ");
-  Serial.println(value);
+
   switch (value) {
     case 0: expectedButton = button1Pin; break;
     case 1: expectedButton = button2Pin; break;
@@ -96,6 +103,9 @@ ISR(TIMER1_COMPA_vect)
 }
 
 void updateLedISR(){
+  if (state != GAME) {
+    return;
+  }
   digitalWrite(led1Pin, LOW);
   digitalWrite(led2Pin, LOW);
   digitalWrite(led3Pin, LOW);
@@ -120,9 +130,21 @@ void updateLedISR(){
 }
 
 void buttonPressISR() {
-  Serial.println("Button pressed");
+  if (state == IDLE) {
+    state=READY;
+    return;
+  }
+  if (state == READY) {
+    state=GAME;
+    return;
+  }
   if (checkCorrect()) {
     scoreUp();
+    Serial.println("Correct Button pressed");
+  } else {
+    Serial.println("peli ohi");
+    printScore();
+    state = IDLE;
   }
 }
 
@@ -132,10 +154,12 @@ void setup() {
   pinMode(button2Pin, INPUT);
   pinMode(button3Pin, INPUT);
   pinMode(button4Pin, INPUT);
+
   pinMode(led1Pin, OUTPUT);
   pinMode(led2Pin, OUTPUT);
   pinMode(led3Pin, OUTPUT);
   pinMode(led4Pin, OUTPUT);
+  score = 0;
   // Initialize random values
   for (int i = 0; i < VALUES_COUNT; ++i) {
     uint8_t val = random(0, 4);
