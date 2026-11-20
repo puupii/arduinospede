@@ -15,7 +15,7 @@ const int button4Pin = 12;
 const int buttonsPin = 2;
 
 // led pins
-const int led1Pin = 3 ;
+const int led1Pin = 3;
 const int led2Pin = 4;
 const int led3Pin = 5;
 const int led4Pin = 6;
@@ -28,7 +28,6 @@ const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
 //////////////////////////////////////////////
 //LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
-int currentValue = 0;
 int currentLed = 0;
 
 void saveScore() {
@@ -44,10 +43,12 @@ void retrieveScore() {
 void scoreUp() {
   ++score;
   printScore();
-  saveScore();
+  //saveScore();
 }
 
 void printScore() {
+  Serial.print("Score: ");
+  Serial.println(score);
   //lcd.setCursor(0, 0);
   //lcd.print(score);
 }
@@ -62,7 +63,7 @@ void initTimer(){
   TCNT1 = 0x0000;            
   OCR1A = 16000;
   TCCR1B |= (1 << WGM12);   //CTC-toimintamoodin valinta eli TCNT nollataan, kun 16000 löytyy
-  TCCR1B |= (1 << CS12) | (1 << CS10) ;    // 1024 prescaler   
+  TCCR1B |= (1 << CS12) | (1 << CS10);    // 1024 prescaler   
   TIFR1 |= (1 << OCF1A);
   TIMSK1 |= (1 << OCIE1A);   // enable interrupt
   sei();             // enable all interrupts
@@ -75,15 +76,16 @@ bool checkCorrect() {
     case 2: return b3 && !(b1 || b2 || b4);
     case 3: return b4 && !(b1 || b2 || b3);
   }*/
-  uint8_t value = values[currentValue];
+  uint8_t value = values[currentLed];
   int expectedButton;
+  Serial.print("LED value: ");
+  Serial.println(value);
   switch (value) {
     case 0: expectedButton = button1Pin; break;
     case 1: expectedButton = button2Pin; break;
     case 2: expectedButton = button3Pin; break;
     case 3: expectedButton = button4Pin; break;
   }
-  ++currentValue;
   return digitalRead(expectedButton);
 }
 ISR(TIMER1_COMPA_vect)
@@ -100,41 +102,25 @@ void updateLedISR(){
   digitalWrite(led4Pin, LOW);
   uint8_t nextLed = values[currentLed];
   switch (nextLed) {
-    case 0:{ 
+    case 0: 
     digitalWrite(led1Pin, HIGH);
     break;
-    }
-    case 1: { 
+    case 1: 
     digitalWrite(led2Pin, HIGH);
     break;
-    }
-    case 2:{ 
+    case 2: 
     digitalWrite(led3Pin, HIGH);
     break;
-    }
-    case 3:{ 
+    case 3: 
     digitalWrite(led4Pin, HIGH);
     break;
-    }
   }
   ++currentLed;
+  if (currentLed > VALUES_COUNT - 1) currentLed = 0;
 }
 
 void buttonPressISR() {
   Serial.println("Button pressed");
-  byte b1 = digitalRead(button1Pin);
-  byte b2 = digitalRead(button2Pin);
-  byte b3 = digitalRead(button3Pin);
-  byte b4 = digitalRead(button4Pin);
-  Serial.print("led 1 is ");
-  Serial.println(b1);
-  Serial.print("led 2 is ");
-  Serial.println(b2);
-  Serial.print("led 3 is ");
-  Serial.println(b3);
-  Serial.print("led 4 is ");
-  Serial.println(b4);
-
   if (checkCorrect()) {
     scoreUp();
   }
