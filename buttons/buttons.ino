@@ -25,9 +25,9 @@ State state = IDLE;
 volatile byte ledState = HIGH;
 
 // LCD pins
-const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+const int rs = A1, en = A2, d4 = A3, d5 = A4, d6 = A5, d7 = A6;
 //////////////////////////////////////////////
-//LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 int currentValue = 0;
 int currentLed = 0;
@@ -57,8 +57,10 @@ void scoreUp() {
 void printScore() {
   Serial.print("Score: ");
   Serial.println(score);
-  //lcd.setCursor(0, 0);
-  //lcd.print(score);
+  lcd.setCursor(0, 0);
+  lcd.print("Score: ");
+  lcd.setCursor(7, 0);
+  lcd.print(score);
 }
 
 void initTimer(){  
@@ -174,11 +176,11 @@ void setup() {
 
   attachInterrupt(digitalPinToInterrupt(buttonsPin), buttonPressISR, RISING);
   Serial.begin(9600);
-  //lcd.begin(16, 2);
+  lcd.begin(16, 2);
+  printScore();
   initTimer();
 }
 
 void loop() {
-  
 
 }
