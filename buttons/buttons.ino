@@ -1,5 +1,5 @@
 #include <EEPROM.h>
-#include <LiquidCrystal.h>
+#include "DFRobot_RGBLCD1602.h"
 #define VALUES_COUNT 100
 uint8_t values[VALUES_COUNT];
 byte score = 0;
@@ -24,10 +24,7 @@ enum State { IDLE, READY, GAME };
 State state = IDLE;
 volatile byte ledState = HIGH;
 
-// LCD pins
-const int rs = A1, en = A2, d4 = A3, d5 = A4, d6 = A5, d7 = A6;
-//////////////////////////////////////////////
-LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+DFRobot_RGBLCD1602 lcd(/*RGBAddr*/0x60 ,/*lcdCols*/16,/*lcdRows*/2);
 
 int currentValue = 0;
 int currentLed = 0;
@@ -176,7 +173,8 @@ void setup() {
 
   attachInterrupt(digitalPinToInterrupt(buttonsPin), buttonPressISR, RISING);
   Serial.begin(9600);
-  lcd.begin(16, 2);
+  lcd.init();
+  lcd.setRGB(0, 255, 127);
   printScore();
   initTimer();
 }
